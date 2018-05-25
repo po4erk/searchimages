@@ -1,51 +1,88 @@
 import React from 'react';
-import { StyleSheet, Text, ScrollView, Image } from 'react-native';
+import {
+  StyleSheet,
+  FlatList,
+  Button,
+  View,
+  Image,
+  ListItem,
+  Text,
+  TouchableOpacity,
+} from 'react-native';
 import { connect } from 'react-redux';
-import getImages from '../actions';
 import { bindActionCreators } from 'redux';
 
-class ImagesSearch extends React.Component{
+import getImages from '../actions';
+import { styles, imageStyles } from '../styles';
 
-    componentDidMount(){
-        this.props.getImages();
-    }
+class ImagesSearch extends React.Component {
+  state = {
+    item: null,
+  };
 
-    render(){
-        console.log(this.props);
-        const {images} = this.props;
-        const imagesList = images.map((image,i) => 
-            <Image
-                key={i}
-                style={{width: 300, height: 300}}
-                source={{uri: image.picture.large}}
-            />
-        );
-        return(
-        <ScrollView contentContainerStyle={styles.container}>
-            {imagesList}
-        </ScrollView>
-        )
-    }
-}
-
-function mapStateToProps(state){
-    return{images: state.images.images}
-};
-function mapDispatchToProps(dispatch){
-    return bindActionCreators({
-      getImages: getImages
-    }, dispatch)
+  componentDidMount() {
+    this.props.getImages();
   }
 
-export default connect(mapStateToProps,mapDispatchToProps)(ImagesSearch);
+  onScroll = () => {
+    const { images } = this.props;
+    this.props.getImages(images);
+  };
 
-const styles = StyleSheet.create({
-    container: {
-      height: "100%",
-      flex: 1,
-      backgroundColor: '#fff',
-      alignItems: 'center',
-      justifyContent: 'center',
+  selectItem = item => {
+    this.setState({
+      item,
+    });
+  };
+
+  render() {
+    const { images } = this.props;
+    const { item } = this.state;
+    const name = (item
+      ? `${item.name.first} ${item.name.last}`
+      : 'Search Image').toUpperCase();
+      
+    return (
+      <View>
+        <Text style={styles.text}>{name}</Text>
+        <FlatList
+          columnWrapperStyle={styles.container}
+          numColumns={2}
+          onEndReached={this.onScroll}
+          data={this.props.images}
+          extraData={this.state}
+          keyExtractor={(item, index) => item.name.first}
+          renderItem={({ item }) => (
+            <TouchableOpacity onPress={this.selectItem.bind(this, item)}>
+              <View>
+                <Image
+                  style={
+                    item.email === (this.state.item && this.state.item.email)
+                      ? styles.selectedImage
+                      : styles.images
+                  }
+                  source={{ uri: item.picture.large }}
+                />
+              </View>
+            </TouchableOpacity>
+          )}
+        />
+      </View>
+    );
+  }
+}
+
+function mapStateToProps(state) {
+  return { images: state.images.images };
+}
+
+function mapDispatchToProps(dispatch) {
+  return bindActionCreators(
+    {
+      getImages: getImages,
     },
-  });
-  
+    dispatch
+  );
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(ImagesSearch);

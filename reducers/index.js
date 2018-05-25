@@ -3,4 +3,4 @@ import { imagesReducers } from './imagesReducer';
 
 export default combineReducers({
   images: imagesReducers,
-})
+});
