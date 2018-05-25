@@ -57,7 +57,7 @@ class ImagesSearch extends React.Component {
               <View>
                 <Image
                   style={
-                    item.email === (this.state.item && this.state.item.email)
+                    item.name === (this.state.item && this.state.item.name)
                       ? styles.selectedImage
                       : styles.images
                   }
